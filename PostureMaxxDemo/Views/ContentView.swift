@@ -6,31 +6,35 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
+            Text("PostureMaxx")
+                .padding(.top, 25)
+                .font(.title2)
+                .bold()
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
             ZStack {
-                // Camera Preview takes up the background
-                // Pass the whole manager instance now
                 CameraPreview(cameraManager: cameraManager)
-                    .frame(width: 300, height: 500)  // Set desired dimensions
-                    .padding(.bottom, 100)  // Add spacing from edges
+                    .cornerRadius(20)
+                    .frame(width: 300, height: 500)
+                    .padding(.bottom, 150)
+                    
                 
 
-                // Overlay the status view
                 VStack {
-                    Spacer() // Push status view towards the bottom
-                    PostureStatusView(status: cameraManager.postureStatus) // Pass the status enum
-                        .padding(.bottom, 50) // Add some padding from the bottom edge
+
+                    Spacer()
+                    PostureStatusView(status: cameraManager.postureStatus)
+                        .padding(.bottom, 50)
                 }
             }
 
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)  // Contain layout
-        .background(Color.black)  // Add background for letterboxing
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black)
         .onAppear {
-             // Session is started internally by CameraManager after setup
              print("ContentView appeared.")
         }
         .onDisappear {
-            // Stop the session when the view disappears to save resources
             cameraManager.stopSession()
             print("ContentView disappeared.")
         }
@@ -39,23 +43,22 @@ struct ContentView: View {
 
 
 struct PostureStatusView: View {
-    let status: PostureStatus // Accept the enum
+    let status: PostureStatus
 
     var body: some View {
-        VStack { // Use VStack for potential future expansion
+        VStack {
             RoundedRectangle(cornerRadius: 20)
-                .fill(statusColor) // Use computed property for color
+                .fill(statusColor)
                 .frame(width: 100, height: 100)
                 .overlay(
-                    Text(statusText) // Use computed property for text
+                    Text(statusText)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
-                        .padding(5) // Add padding to text
+                        .padding(5)
                 )
         }
     }
 
-    // Computed property for the circle color based on status
     private var statusColor: Color {
         switch status {
         case .good:
@@ -63,11 +66,10 @@ struct PostureStatusView: View {
         case .bad:
             return .red
         case .notFound:
-            return .gray // Use gray for the 'not found' state
+            return .gray
         }
     }
 
-    // Computed property for the display text based on status
     private var statusText: String {
         switch status {
         case .good:
@@ -79,6 +81,8 @@ struct PostureStatusView: View {
         }
     }
 }
+
+
 
 
 

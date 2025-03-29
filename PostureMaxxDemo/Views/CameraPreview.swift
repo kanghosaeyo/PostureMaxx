@@ -1,60 +1,39 @@
 // CameraPreview.swift
-
 import SwiftUI
 import AVFoundation
-import Vision // Import Vision
+import Vision
 import UIKit
 
 struct CameraPreview: UIViewRepresentable {
-    // Observe the CameraManager to get observations
     @ObservedObject var cameraManager: CameraManager
 
-    func makeUIView(context: Context) -> VideoPreviewView { // Return specific type
+    func makeUIView(context: Context) -> VideoPreviewView {
         let view = VideoPreviewView()
-        // Ensure the session is assigned. If CameraManager sets it up asynchronously,
-        // this might need to be done in updateUIView or via a coordinator initially.
         view.previewLayer.session = cameraManager.session
         view.previewLayer.videoGravity = .resizeAspectFill
-
-        // Set the initial frame for the overlay layer
-        // Note: Bounds might be zero here initially. layoutSubviews is more reliable.
         view.poseOverlayLayer.frame = view.bounds
-        // Add the overlay layer
         view.layer.addSublayer(view.poseOverlayLayer)
-
         return view
     }
 
-    func updateUIView(_ uiView: VideoPreviewView, context: Context) { // Use specific type
-        // Update the pose overlay when the observation changes
-        uiView.updatePoseOverlay(for: cameraManager.latestObservation)
+    func updateUIView(_ uiView: VideoPreviewView, context: Context) {
+        uiView.updatePoseOverlay(using: cameraManager.smoothedPoints)
 
-        // Ensure the preview layer's session is up-to-date
-        // This handles cases where the session might be reset or assigned later
         if uiView.previewLayer.session != cameraManager.session {
              uiView.previewLayer.session = cameraManager.session
         }
     }
 
-    // Custom UIView subclass to host the preview layer AND the pose overlay
     class VideoPreviewView: UIView {
-        // The layer displaying the camera feed
-        override class var layerClass: AnyClass {
-            AVCaptureVideoPreviewLayer.self
-        }
+        override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+        var previewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
 
-        var previewLayer: AVCaptureVideoPreviewLayer {
-            // Force unwrap is generally safe here because we override layerClass
-            layer as! AVCaptureVideoPreviewLayer
-        }
-
-        // The layer for drawing pose lines
         let poseOverlayLayer: CAShapeLayer = {
+            // Layer setup (same as before)
             let layer = CAShapeLayer()
-            layer.strokeColor = UIColor.systemGreen.cgColor // Line color
-            layer.lineWidth = 5.0 // Line width
-            layer.fillColor = UIColor.clear.cgColor // No fill
-            // Optional: Add shadow for better visibility
+            layer.strokeColor = UIColor.systemGreen.cgColor
+            layer.lineWidth = 3.0
+            layer.fillColor = UIColor.clear.cgColor
             layer.shadowColor = UIColor.black.cgColor
             layer.shadowOpacity = 0.7
             layer.shadowRadius = 3.0
@@ -62,107 +41,61 @@ struct CameraPreview: UIViewRepresentable {
             return layer
         }()
 
-        // Called when the view's bounds change (e.g., rotation, initial layout)
         override func layoutSubviews() {
             super.layoutSubviews()
-            // Keep the overlay layer sized to the view bounds reliably
             poseOverlayLayer.frame = bounds
         }
 
-        // Function to draw lines based on pose observation
-        func updatePoseOverlay(for observation: VNHumanBodyPoseObservation?) {
-            // Ensure we are on the main thread for UI updates
+        func updatePoseOverlay(using points: [VNHumanBodyPoseObservation.JointName: CGPoint]?) {
+
              guard Thread.isMainThread else {
-                 DispatchQueue.main.async { self.updatePoseOverlay(for: observation) }
+                 DispatchQueue.main.async { self.updatePoseOverlay(using: points) }
                  return
              }
 
-            guard let observation = observation else {
-                // No observation, clear the path
+            guard let smoothedPoints = points else {
                 poseOverlayLayer.path = nil
                 return
             }
 
             let path = UIBezierPath()
 
-            do {
-                // The dictionary uses JointName as its key type
-                 let recognizedPoints: [VNHumanBodyPoseObservation.JointName: VNRecognizedPoint]
-                 recognizedPoints = try observation.recognizedPoints(.all)
+             let connections: [(VNHumanBodyPoseObservation.JointName, VNHumanBodyPoseObservation.JointName)] = [
+                (.neck, .leftShoulder)
+             ]
 
-                // --- Define Connections ---
-                // List pairs of joints you want to connect
-                let connections: [(VNHumanBodyPoseObservation.JointName, VNHumanBodyPoseObservation.JointName)] = [
-                    // Head
-                    (.neck, .leftEar),
-                //    (.neck, .rightEar),
-                    // Torso
-                    (.neck, .leftShoulder),
-                //    (.neck, .rightShoulder),
-                //    (.leftShoulder, .rightShoulder), // Across shoulders
-                    (.leftShoulder, .leftHip),
-                 //   (.rightShoulder, .rightHip),
-                 //   (.leftHip, .rightHip), // Across hips
-                    // Left Arm
-                   // (.leftShoulder, .leftElbow),
-                  //  (.leftElbow, .leftWrist),
-                    // Right Arm
-                  //  (.rightShoulder, .rightElbow),
-                  //  (.rightElbow, .rightWrist)
-                    // Add legs if needed: e.g., (.leftHip, .leftKnee), (.leftKnee, .leftAnkle)
-                ]
-
-                // --- Draw Connections ---
-                for (startKey, endKey) in connections {
-                    // Check confidence level for both points
-                    guard let startPoint = recognizedPoints[startKey], startPoint.confidence > 0.1,
-                          let endPoint = recognizedPoints[endKey], endPoint.confidence > 0.1 else {
-                        continue // Skip if points are missing or low confidence
-                    }
-
-                    // Convert normalized points to view coordinates
-                    let viewStartPoint = pointInView(startPoint.location)
-                    let viewEndPoint = pointInView(endPoint.location)
-
-                    // Don't draw if points are effectively zero (can happen if conversion fails)
-                    guard viewStartPoint != .zero && viewEndPoint != .zero else { continue }
-
-                    path.move(to: viewStartPoint)
-                    path.addLine(to: viewEndPoint)
+            for (startKey, endKey) in connections {
+                guard let startPointLocation = smoothedPoints[startKey],
+                      let endPointLocation = smoothedPoints[endKey] else {
+                    continue
                 }
 
-            } catch {
-                print("Error getting recognized points for drawing: \(error)")
-                // Clear path on error
-                poseOverlayLayer.path = nil
-                return
+                let viewStartPoint = pointInView(startPointLocation)
+                let viewEndPoint = pointInView(endPointLocation)
+
+                // Don't draw if points are effectively zero
+                guard viewStartPoint != .zero && viewEndPoint != .zero else { continue }
+
+                path.move(to: viewStartPoint)
+                path.addLine(to: viewEndPoint)
             }
 
-            // Update the layer's path atomically
+
              CATransaction.begin()
-             CATransaction.setDisableActions(true) // Avoid implicit animation
+             CATransaction.setDisableActions(true)
              poseOverlayLayer.path = path.cgPath
              CATransaction.commit()
         }
 
-        // Helper function to convert normalized point to view coordinates
         private func pointInView(_ normalizedPoint: CGPoint) -> CGPoint {
-            // --- Manual Conversion ---
-            // Assumes Vision normalized coordinates (0,0) at bottom-left.
-            // View/Layer coordinates (0,0) at top-left.
             let viewWidth = bounds.width
             let viewHeight = bounds.height
-
-            // Check for valid bounds to prevent division by zero or NaN results
-            guard viewWidth > 0, viewHeight > 0 else {
-                return .zero // Return zero point if bounds are not valid yet
-            }
-
+            guard viewWidth > 0, viewHeight > 0 else { return .zero }
             let viewX = normalizedPoint.x * viewWidth
-            let viewY = (1.0 - normalizedPoint.y) * viewHeight // Flip Y-axis
-
+            let viewY = (1.0 - normalizedPoint.y) * viewHeight
             return CGPoint(x: viewX, y: viewY)
         }
     }
 }
+
 

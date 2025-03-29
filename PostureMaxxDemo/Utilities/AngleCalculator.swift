@@ -9,7 +9,6 @@ import CoreGraphics
 
 struct AngleCalculator {
     static func neckAngle(neck: CGPoint, leftEar: CGPoint) -> CGFloat {
-        // Simplified vertical angle calculation
         let vertical = CGPoint(x: neck.x, y: neck.y - 100)
         return angleBetweenThreePoints(a: vertical, b: neck, c: leftEar)
     }

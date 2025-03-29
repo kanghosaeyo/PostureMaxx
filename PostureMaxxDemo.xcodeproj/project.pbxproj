@@ -48,16 +48,6 @@
 			path = PostureMaxxDemo;
 			sourceTree = "<group>";
 		};
-		828E38272D976F6F00A4DF9E /* PostureMaxxDemoTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PostureMaxxDemoTests;
-			sourceTree = "<group>";
-		};
-		828E38312D976F6F00A4DF9E /* PostureMaxxDemoUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PostureMaxxDemoUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,8 +79,6 @@
 			isa = PBXGroup;
 			children = (
 				828E38152D976F6C00A4DF9E /* PostureMaxxDemo */,
-				828E38272D976F6F00A4DF9E /* PostureMaxxDemoTests */,
-				828E38312D976F6F00A4DF9E /* PostureMaxxDemoUITests */,
 				828E38142D976F6C00A4DF9E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -143,9 +131,6 @@
 			dependencies = (
 				828E38262D976F6F00A4DF9E /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				828E38272D976F6F00A4DF9E /* PostureMaxxDemoTests */,
-			);
 			name = PostureMaxxDemoTests;
 			packageProductDependencies = (
 			);
@@ -165,9 +150,6 @@
 			);
 			dependencies = (
 				828E38302D976F6F00A4DF9E /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				828E38312D976F6F00A4DF9E /* PostureMaxxDemoUITests */,
 			);
 			name = PostureMaxxDemoUITests;
 			packageProductDependencies = (
