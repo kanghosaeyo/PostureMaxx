@@ -6,10 +6,10 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            CameraPreview(captureSession: cameraManager.session) // Pass session directly
-                .edgesIgnoringSafeArea(.all)
 
             VStack {
+                CameraPreview(captureSession: cameraManager.session) // Pass session directly
+                    .edgesIgnoringSafeArea(.all)
                 PostureStatusView(isBadPosture: cameraManager.isBadPosture)
             }
         }

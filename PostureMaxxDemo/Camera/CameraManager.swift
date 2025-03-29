@@ -15,8 +15,18 @@ class CameraManager: NSObject, ObservableObject {
 
     override init() {
         super.init()
-        setupCamera()
+        requestCameraAccess()
     }
+    
+    private func requestCameraAccess() {
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if granted {
+                    self.setupCamera()
+                } else {
+                    print("Camera access denied.")
+                }
+            }
+        }
 
     private func setupCamera() {
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
@@ -33,7 +43,7 @@ class CameraManager: NSObject, ObservableObject {
             session.addOutput(videoOutput)
         }
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.main.async { // Ensure this runs on the main thread
             self.session.startRunning()
         }
     }
