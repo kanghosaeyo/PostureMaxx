@@ -5,7 +5,6 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
-    @StateObject private var notificationManager = NotificationManager() // Assuming this exists
 
     var body: some View {
         ZStack {
@@ -19,12 +18,6 @@ struct ContentView: View {
                 Spacer() // Push status view towards the bottom
                 PostureStatusView(status: cameraManager.postureStatus) // Pass the status enum
                     .padding(.bottom, 50) // Add some padding from the bottom edge
-            }
-        }
-        .onChange(of: cameraManager.postureStatus) { oldStatus, newStatus in
-            // Trigger notification only when transitioning specifically to bad posture
-            if newStatus == .bad && oldStatus != .bad {
-                notificationManager.scheduleNotification() // Make sure notificationManager is correctly implemented
             }
         }
         .onAppear {
@@ -45,7 +38,7 @@ struct PostureStatusView: View {
 
     var body: some View {
         VStack { // Use VStack for potential future expansion
-            Circle()
+            RoundedRectangle(cornerRadius: 20)
                 .fill(statusColor) // Use computed property for color
                 .frame(width: 100, height: 100)
                 .overlay(
