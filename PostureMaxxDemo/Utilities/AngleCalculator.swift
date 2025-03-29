@@ -8,14 +8,10 @@
 import CoreGraphics
 
 struct AngleCalculator {
-    static func neckAngle(neck: CGPoint) -> CGFloat {
+    static func neckAngle(neck: CGPoint, leftEar: CGPoint) -> CGFloat {
         // Simplified vertical angle calculation
         let vertical = CGPoint(x: neck.x, y: neck.y - 100)
-        return angleBetweenThreePoints(a: vertical, b: neck, c: CGPoint(x: neck.x + 100, y: neck.y))
-    }
-    
-    static func shoulderAngle(left: CGPoint, right: CGPoint) -> CGFloat {
-        abs(atan2(right.y - left.y, right.x - left.x).degrees)
+        return angleBetweenThreePoints(a: vertical, b: neck, c: leftEar)
     }
     
     private static func angleBetweenThreePoints(a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
