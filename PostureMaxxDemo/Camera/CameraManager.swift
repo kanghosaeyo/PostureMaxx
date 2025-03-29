@@ -43,7 +43,7 @@ class CameraManager: NSObject, ObservableObject {
             session.addOutput(videoOutput)
         }
 
-        DispatchQueue.main.async { // Ensure this runs on the main thread
+        DispatchQueue.global(qos: .userInitiated).async {
             self.session.startRunning()
         }
     }
