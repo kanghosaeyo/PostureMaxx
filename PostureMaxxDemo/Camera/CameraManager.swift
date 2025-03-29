@@ -9,11 +9,59 @@ import AVFoundation
 import Vision
 import Combine
 import UIKit
+import AudioToolbox
+
+
+enum Vibration {
+      case error
+      case success
+      case warning
+      case light
+      case medium
+      case heavy
+      @available(iOS 13.0, *)
+      case soft
+      @available(iOS 13.0, *)
+      case rigid
+      case selection
+      case oldSchool
+
+      public func vibrate() {
+          switch self {
+          case .error:
+              UINotificationFeedbackGenerator().notificationOccurred(.error)
+          case .success:
+              UINotificationFeedbackGenerator().notificationOccurred(.success)
+          case .warning:
+              UINotificationFeedbackGenerator().notificationOccurred(.warning)
+          case .light:
+              UIImpactFeedbackGenerator(style: .light).impactOccurred()
+          case .medium:
+              UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+          case .heavy:
+              UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+          case .soft:
+              if #available(iOS 13.0, *) {
+                  UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+              }
+          case .rigid:
+              if #available(iOS 13.0, *) {
+                  UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+              }
+          case .selection:
+              UISelectionFeedbackGenerator().selectionChanged()
+          case .oldSchool:
+              AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+          }
+      }
+  }
+
 
 class CameraManager: NSObject, ObservableObject {
     let session = AVCaptureSession()
     private var lastProcessedTime = Date(timeIntervalSince1970: 0)
     private let processingInterval: TimeInterval = 0.1 // Process every 0.1 seconds (adjust as needed)
+    
 
     @Published var postureStatus: PostureStatus = .notFound
     @Published var latestObservation: VNHumanBodyPoseObservation? = nil // Publish the observation
@@ -24,6 +72,7 @@ class CameraManager: NSObject, ObservableObject {
         requestCameraAccess()
     }
 
+    
     private func requestCameraAccess() {
         AVCaptureDevice.requestAccess(for: .video) { granted in
              DispatchQueue.main.async { // Ensure UI updates and setup happen on main thread
@@ -117,6 +166,11 @@ class CameraManager: NSObject, ObservableObject {
                 if let observation = request.results?.first {
                     newObservation = observation // Store observation if found
                     newStatus = PoseProcessor.checkPosture(observations: [observation]) // Calculate status
+                    if newStatus == .bad {
+                        Vibration.success.vibrate()
+                        AudioServicesPlaySystemSound(1007)
+                        
+                    }
                 } else {
                     newStatus = .notFound // No observation means notFound
                 }
