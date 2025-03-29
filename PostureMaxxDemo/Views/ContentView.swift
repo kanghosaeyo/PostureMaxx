@@ -5,19 +5,26 @@ struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
 
     var body: some View {
-        ZStack {
-            // Camera Preview takes up the background
-            // Pass the whole manager instance now
-            CameraPreview(cameraManager: cameraManager)
-                .edgesIgnoringSafeArea(.all)
+        VStack {
+            ZStack {
+                // Camera Preview takes up the background
+                // Pass the whole manager instance now
+                CameraPreview(cameraManager: cameraManager)
+                    .frame(width: 300, height: 500)  // Set desired dimensions
+                    .padding(.bottom, 100)  // Add spacing from edges
+                
 
-            // Overlay the status view
-            VStack {
-                Spacer() // Push status view towards the bottom
-                PostureStatusView(status: cameraManager.postureStatus) // Pass the status enum
-                    .padding(.bottom, 50) // Add some padding from the bottom edge
+                // Overlay the status view
+                VStack {
+                    Spacer() // Push status view towards the bottom
+                    PostureStatusView(status: cameraManager.postureStatus) // Pass the status enum
+                        .padding(.bottom, 50) // Add some padding from the bottom edge
+                }
             }
+
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)  // Contain layout
+        .background(Color.black)  // Add background for letterboxing
         .onAppear {
              // Session is started internally by CameraManager after setup
              print("ContentView appeared.")
