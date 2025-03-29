@@ -1,5 +1,3 @@
-import SwiftUI
-
 // ContentView.swift
 import SwiftUI
 
