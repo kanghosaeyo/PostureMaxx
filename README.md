@@ -34,7 +34,7 @@ An iOS application developed during a 24-hour hackathon (Mar 2025) aimed at comb
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-github-username/PostureMaxx.git](https://www.google.com/search?q=https://github.com/your-github-username/PostureMaxx.git)
+    git clone [https://github.com/kanghosaeyo/PostureMaxx.git](https://www.google.com/search?q=https://github.com/kanghosaeyo/PostureMaxx.git)
     cd PostureMaxx
     ```
     *(Replace with your actual repository URL)*
