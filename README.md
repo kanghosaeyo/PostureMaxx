@@ -34,10 +34,8 @@ An iOS application developed during a 24-hour hackathon (Mar 2025) aimed at comb
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/kanghosaeyo/PostureMaxx.git](https://www.google.com/search?q=https://github.com/kanghosaeyo/PostureMaxx.git)
-    cd PostureMaxx
+    git clone [https://github.com/kanghosaeyo/PostureMaxx.git]
     ```
-    *(Replace with your actual repository URL)*
 2.  **Open the project:** Open the `.xcodeproj` or `.xcworkspace` file in Xcode.
 3.  **Configure Signing:** Select your developer account in the "Signing & Capabilities" tab for the project target.
 4.  **Build & Run:** Select your connected iOS device or a simulator (camera feed will be simulated) and run the project (Cmd+R).
