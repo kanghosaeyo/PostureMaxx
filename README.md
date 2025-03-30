@@ -30,17 +30,6 @@ An iOS application developed during a 24-hour hackathon (Mar 2025) aimed at comb
 * An iOS device with a front-facing camera (required for pose detection)
 * Apple Developer Account (if running on a physical device)
 
-### Installation & Running
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/kanghosaeyo/PostureMaxx.git]
-    ```
-2.  **Open the project:** Open the `.xcodeproj` or `.xcworkspace` file in Xcode.
-3.  **Configure Signing:** Select your developer account in the "Signing & Capabilities" tab for the project target.
-4.  **Build & Run:** Select your connected iOS device or a simulator (camera feed will be simulated) and run the project (Cmd+R).
-5.  **Permissions:** Grant camera permission when prompted by the app upon first launch. Notification permissions may also be requested for alerts.
-
 ## Usage
 
 1.  Launch the PostureMaxx app.
